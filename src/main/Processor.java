@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Downloader {
+public class Processor {
 
 	String url;
 	String dir;
 	String URLPattern = "(http://|https://){1}[\\w\\.\\-/:\\#\\?\\=\\&\\;\\%\\~\\+]+";
 
-	public Downloader(String url, String dir) {
+	public Processor(String url, String dir) {
 		this.url = url;
 		this.dir = dir;
 	}
