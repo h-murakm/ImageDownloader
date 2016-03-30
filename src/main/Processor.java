@@ -70,7 +70,7 @@ public class Processor {
 					conn.connect();
 					int httpStatusCode = conn.getResponseCode();
 					if (httpStatusCode != HttpURLConnection.HTTP_OK) {
-
+						throw new Exception();
 					}
 					String fileName = url.substring(url.lastIndexOf("/"));
 					String dist = newDir.toString() + fileName;
@@ -146,16 +146,22 @@ public class Processor {
 	}
 
 	private String getImageName(String source) {
-		int beginIndex = source.indexOf("</h1><h1 id=\"gj\">");
-		beginIndex += "</h1><h1 id=\"gj\">".length();
-		int endIndex = source.indexOf("</h1></div>");
+//		int beginIndex = source.indexOf("</h1><h1 id=\"gj\">");
+//		beginIndex += "</h1><h1 id=\"gj\">".length();
+//		int endIndex = source.indexOf("</h1></div>");
+//		String imageName = source.substring(beginIndex, endIndex);
+//		if (!isValidName(imageName)) {
+//			beginIndex = source.indexOf("<title>");
+//			beginIndex += "<title>".length();
+//			endIndex = source.indexOf("</title>");
+//			imageName = source.substring(beginIndex, endIndex);
+//		}
+//		return imageName;
+
+		int beginIndex = source.indexOf("<title>");
+		beginIndex += "<title>".length();
+		int endIndex = source.indexOf("</title>");
 		String imageName = source.substring(beginIndex, endIndex);
-		if (!isValidName(imageName)) {
-			beginIndex = source.indexOf("<title>");
-			beginIndex += "<title>".length();
-			endIndex = source.indexOf("</title>");
-			imageName = source.substring(beginIndex, endIndex);
-		}
 		return imageName;
 	}
 
