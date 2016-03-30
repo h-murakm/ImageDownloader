@@ -20,6 +20,7 @@ public class Processor {
 	String url;
 	String dir;
 	String URLPattern = "(http://|https://){1}[\\w\\.\\-/:\\#\\?\\=\\&\\;\\%\\~\\+]+";
+	int totalImages;
 
 	public Processor(String url, String dir) {
 		this.url = url;
@@ -34,6 +35,7 @@ public class Processor {
 			String imageName = getImageName(source);
 			System.out.println("Image Name: " + imageName);
 			int totalImages = getTotalImages(source);
+			this.totalImages = totalImages;
 			System.out.println("Total Images: " + totalImages);
 			System.out.println("Getting Image URLs ...");
 			String firstUrl = getFirstPage(source);
@@ -58,32 +60,35 @@ public class Processor {
 			StringBuilder sb = new StringBuilder();
 			sb.append("( ").append(index).append(" / ").append(totalImages).append(" ) ").append(url);
 			System.out.println(sb.toString());
-			try {
-				//URL url = new URL("http://loto6.thekyo.jp/data/loto6.csv");
-				HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-				conn.setAllowUserInteraction(false);
-				conn.setInstanceFollowRedirects(true);
-				conn.setRequestMethod("GET");
-				conn.connect();
-				int httpStatusCode = conn.getResponseCode();
-				if (httpStatusCode != HttpURLConnection.HTTP_OK) {
-					throw new Exception();
+			boolean validFlag = false;
+			//while (!validFlag) {
+				try {
+					HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+					conn.setAllowUserInteraction(false);
+					conn.setInstanceFollowRedirects(true);
+					conn.setRequestMethod("GET");
+					conn.connect();
+					int httpStatusCode = conn.getResponseCode();
+					if (httpStatusCode != HttpURLConnection.HTTP_OK) {
+
+					}
+					String fileName = url.substring(url.lastIndexOf("/"));
+					String dist = newDir.toString() + fileName;
+					DataInputStream dataInStream = new DataInputStream(conn.getInputStream());
+					DataOutputStream dataOutStream = new DataOutputStream(new BufferedOutputStream(
+							new FileOutputStream(dist)));
+					byte[] b = new byte[8192];
+					int readByte = 0;
+					while (-1 != (readByte = dataInStream.read(b))) {
+						dataOutStream.write(b, 0, readByte);
+					}
+					dataInStream.close();
+					dataOutStream.close();
+					validFlag = true;
+				} catch (Exception e) {
+					//e.printStackTrace();
 				}
-				String fileName = url.substring(url.lastIndexOf("/"));
-				String dist = newDir.toString() + fileName;
-				DataInputStream dataInStream = new DataInputStream(conn.getInputStream());
-				DataOutputStream dataOutStream = new DataOutputStream(new BufferedOutputStream(
-						new FileOutputStream(dist)));
-				byte[] b = new byte[4096];
-				int readByte = 0;
-				while (-1 != (readByte = dataInStream.read(b))) {
-					dataOutStream.write(b, 0, readByte);
-				}
-				dataInStream.close();
-				dataOutStream.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			//}
 		}
 	}
 
@@ -91,27 +96,30 @@ public class Processor {
 		String url = firstUrl;
 		int index = 1;
 		ArrayList<String> list = new ArrayList<String>();
-		list.add(getImageUrl(firstUrl));
+		list.add(getImageUrl(firstUrl, index));
 		while (true) {
 			index++;
-			String nextIndex = "-" + index;
-			String nextUrl = getNextUrl(url, nextIndex);
+			if(index > totalImages) break;
+			String nextUrl = getNextUrl(url, index);
 			if (nextUrl.equals(""))
 				break;
 			url = nextUrl;
-			list.add(getImageUrl(nextUrl));
+			list.add(getImageUrl(nextUrl, index));
 			//System.out.println(nextIndex);
 		}
 		return list;
 	}
 
-	private String getImageUrl(String url) {
+	private String getImageUrl(String url, int index) {
 		try {
 			String source = getSourceText(new URL(url));
 			int beginIndex = source.indexOf("<img id=\"img\" src=\"");
 			beginIndex += "<img id=\"img\" src=\"".length();
 			int endIndex = source.indexOf("\" style=", beginIndex);
 			String imageUrl = source.substring(beginIndex, endIndex);
+			StringBuilder sb = new StringBuilder();
+			sb.append("( ").append(index).append(" / ").append(totalImages).append(" ) ").append(imageUrl);
+			System.out.println(sb.toString());
 			return imageUrl;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -119,30 +127,43 @@ public class Processor {
 		return null;
 	}
 
-	private String getNextUrl(String url, String pageIndex) {
+	private String getNextUrl(String url, int index) {
 		try {
 			String source = getSourceText(new URL(url));
-			Pattern urlPattern = Pattern.compile(URLPattern, Pattern.CASE_INSENSITIVE);
-			Matcher matcher = urlPattern.matcher(source);
-			while (matcher.find()) {
-				String nextUrl = matcher.group();
-				if (nextUrl.endsWith(pageIndex)) {
-					return nextUrl;
-				}
+			String tmp = "return load_image(" + index;
+			int tmpIndex = source.indexOf(tmp);
+			int beginIndex = source.indexOf("href=\"", tmpIndex) + "href=\"".length();
+			int endIndex = source.indexOf("\"><img", beginIndex);
+			if(beginIndex == -1 || endIndex == -1){
+				return "";
 			}
+			String ret = source.substring(beginIndex, endIndex);
+			return ret;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return "";
-
 	}
 
 	private String getImageName(String source) {
-		int beginIndex = source.indexOf("<title>");
-		beginIndex += "<title>".length();
-		int endIndex = source.indexOf("</title>");
+		int beginIndex = source.indexOf("</h1><h1 id=\"gj\">");
+		beginIndex += "</h1><h1 id=\"gj\">".length();
+		int endIndex = source.indexOf("</h1></div>");
 		String imageName = source.substring(beginIndex, endIndex);
+		if (!isValidName(imageName)) {
+			beginIndex = source.indexOf("<title>");
+			beginIndex += "<title>".length();
+			endIndex = source.indexOf("</title>");
+			imageName = source.substring(beginIndex, endIndex);
+		}
 		return imageName;
+	}
+
+	private boolean isValidName(String name) {
+		if (name == null || name.length() < 1) {
+			return false;
+		}
+		return true;
 	}
 
 	private int getTotalImages(String source) {
