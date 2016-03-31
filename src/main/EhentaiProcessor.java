@@ -19,12 +19,14 @@ public class EhentaiProcessor {
 
 	String url;
 	String dir;
+	boolean isJapanese;
 	String URLPattern = "(http://|https://){1}[\\w\\.\\-/:\\#\\?\\=\\&\\;\\%\\~\\+]+";
 	int totalImages;
 
-	public EhentaiProcessor(String url, String dir) {
+	public EhentaiProcessor(String url, String dir, boolean isJapanese) {
 		this.url = url;
 		this.dir = dir;
+		this.isJapanese = isJapanese;
 	}
 
 	public void process() {
@@ -62,32 +64,32 @@ public class EhentaiProcessor {
 			System.out.println(sb.toString());
 			boolean validFlag = false;
 			//while (!validFlag) {
-				try {
-					HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-					conn.setAllowUserInteraction(false);
-					conn.setInstanceFollowRedirects(true);
-					conn.setRequestMethod("GET");
-					conn.connect();
-					int httpStatusCode = conn.getResponseCode();
-					if (httpStatusCode != HttpURLConnection.HTTP_OK) {
-						throw new Exception();
-					}
-					String fileName = url.substring(url.lastIndexOf("/"));
-					String dist = newDir.toString() + fileName;
-					DataInputStream dataInStream = new DataInputStream(conn.getInputStream());
-					DataOutputStream dataOutStream = new DataOutputStream(new BufferedOutputStream(
-							new FileOutputStream(dist)));
-					byte[] b = new byte[8192];
-					int readByte = 0;
-					while (-1 != (readByte = dataInStream.read(b))) {
-						dataOutStream.write(b, 0, readByte);
-					}
-					dataInStream.close();
-					dataOutStream.close();
-					validFlag = true;
-				} catch (Exception e) {
-					//e.printStackTrace();
+			try {
+				HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+				conn.setAllowUserInteraction(false);
+				conn.setInstanceFollowRedirects(true);
+				conn.setRequestMethod("GET");
+				conn.connect();
+				int httpStatusCode = conn.getResponseCode();
+				if (httpStatusCode != HttpURLConnection.HTTP_OK) {
+					throw new Exception();
 				}
+				String fileName = url.substring(url.lastIndexOf("/"));
+				String dist = newDir.toString() + fileName;
+				DataInputStream dataInStream = new DataInputStream(conn.getInputStream());
+				DataOutputStream dataOutStream = new DataOutputStream(new BufferedOutputStream(
+						new FileOutputStream(dist)));
+				byte[] b = new byte[8192];
+				int readByte = 0;
+				while (-1 != (readByte = dataInStream.read(b))) {
+					dataOutStream.write(b, 0, readByte);
+				}
+				dataInStream.close();
+				dataOutStream.close();
+				validFlag = true;
+			} catch (Exception e) {
+				//e.printStackTrace();
+			}
 			//}
 		}
 	}
@@ -99,13 +101,13 @@ public class EhentaiProcessor {
 		list.add(getImageUrl(firstUrl, index));
 		while (true) {
 			index++;
-			if(index > totalImages) break;
+			if (index > totalImages)
+				break;
 			String nextUrl = getNextUrl(url, index);
 			if (nextUrl.equals(""))
 				break;
 			url = nextUrl;
 			list.add(getImageUrl(nextUrl, index));
-			//System.out.println(nextIndex);
 		}
 		return list;
 	}
@@ -134,7 +136,7 @@ public class EhentaiProcessor {
 			int tmpIndex = source.indexOf(tmp);
 			int beginIndex = source.indexOf("href=\"", tmpIndex) + "href=\"".length();
 			int endIndex = source.indexOf("\"><img", beginIndex);
-			if(beginIndex == -1 || endIndex == -1){
+			if (beginIndex == -1 || endIndex == -1) {
 				return "";
 			}
 			String ret = source.substring(beginIndex, endIndex);
@@ -146,23 +148,19 @@ public class EhentaiProcessor {
 	}
 
 	private String getImageName(String source) {
-//		int beginIndex = source.indexOf("</h1><h1 id=\"gj\">");
-//		beginIndex += "</h1><h1 id=\"gj\">".length();
-//		int endIndex = source.indexOf("</h1></div>");
-//		String imageName = source.substring(beginIndex, endIndex);
-//		if (!isValidName(imageName)) {
-//			beginIndex = source.indexOf("<title>");
-//			beginIndex += "<title>".length();
-//			endIndex = source.indexOf("</title>");
-//			imageName = source.substring(beginIndex, endIndex);
-//		}
-//		return imageName;
-
-		int beginIndex = source.indexOf("<title>");
-		beginIndex += "<title>".length();
-		int endIndex = source.indexOf("</title>");
-		String imageName = source.substring(beginIndex, endIndex);
-		return imageName;
+		if (isJapanese) {
+			int beginIndex = source.indexOf("</h1><h1 id=\"gj\">");
+			beginIndex += "</h1><h1 id=\"gj\">".length();
+			int endIndex = source.indexOf("</h1></div>");
+			String imageName = source.substring(beginIndex, endIndex);
+			imageName = imageName.replaceAll("\\!", "");
+			return imageName;
+		} else {
+			int beginIndex = source.indexOf("<title>") + "<title>".length();
+			int endIndex = source.indexOf("</title>");
+			String imageName = source.substring(beginIndex, endIndex);
+			return imageName;
+		}
 	}
 
 	private boolean isValidName(String name) {

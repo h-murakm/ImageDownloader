@@ -19,14 +19,16 @@ public class NhentaiProcessor {
 
 	String url;
 	String dir;
+	boolean isJapanese;
 	String URLPattern = "(http://|https://){1}[\\w\\.\\-/:\\#\\?\\=\\&\\;\\%\\~\\+]+";
 	String pagePattern = "<div>.+?pages</div>";
 	String imageUrlPattern = "data-src=\".*?\" />";
 	int totalImages;
 
-	public NhentaiProcessor(String url, String dir) {
+	public NhentaiProcessor(String url, String dir, boolean isJapanese) {
 		this.url = url;
 		this.dir = dir;
+		this.isJapanese = isJapanese;
 	}
 
 	public void process() {
@@ -138,11 +140,20 @@ public class NhentaiProcessor {
 	}
 
 	private String getImageName(String source) {
-		int beginIndex = source.indexOf("<h1>");
-		beginIndex += "<h1>".length();
-		int endIndex = source.indexOf("</h1>");
-		String imageName = source.substring(beginIndex, endIndex);
-		return imageName;
+		if(isJapanese){
+			int beginIndex = source.indexOf("<h2>");
+			beginIndex += "<h2>".length();
+			int endIndex = source.indexOf("</h2>");
+			String imageName = source.substring(beginIndex, endIndex);
+			imageName = imageName.replaceAll("\\!", "");
+			return imageName;
+		}else{
+			int beginIndex = source.indexOf("<h1>");
+			beginIndex += "<h1>".length();
+			int endIndex = source.indexOf("</h1>");
+			String imageName = source.substring(beginIndex, endIndex);
+			return imageName;
+		}
 	}
 
 	public static String getSourceText(URL url) throws IOException {
