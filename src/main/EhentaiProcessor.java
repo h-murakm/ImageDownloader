@@ -15,14 +15,14 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Processor {
+public class EhentaiProcessor {
 
 	String url;
 	String dir;
 	String URLPattern = "(http://|https://){1}[\\w\\.\\-/:\\#\\?\\=\\&\\;\\%\\~\\+]+";
 	int totalImages;
 
-	public Processor(String url, String dir) {
+	public EhentaiProcessor(String url, String dir) {
 		this.url = url;
 		this.dir = dir;
 	}

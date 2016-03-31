@@ -28,15 +28,29 @@ public class ImageDownloader {
 			if (cl.hasOption('f') && cl.hasOption('d')) {
 				ArrayList<String> urlList = getUrlList(cl.getOptionValue("f"));
 				String dir = cl.getOptionValue("d");
-				for(String url : urlList){
-					Processor processor = new Processor(url, dir);
-					processor.process();
+				for (String url : urlList) {
+					if (isEhentaiUrl(url)) {
+						EhentaiProcessor processor = new EhentaiProcessor(url, dir);
+						processor.process();
+					}else if(isNhentaiUrl(url)){
+						NhentaiProcessor processor = new NhentaiProcessor(url, dir);
+						processor.process();
+					}else{
+						System.out.println(url + " is not supported");
+					}
 				}
 			} else if (cl.hasOption('u') && cl.hasOption('d')) {
 				String url = cl.getOptionValue("u");
 				String dir = cl.getOptionValue("d");
-				Processor processor = new Processor(url, dir);
-				processor.process();
+				if (isEhentaiUrl(url)) {
+					EhentaiProcessor processor = new EhentaiProcessor(url, dir);
+					processor.process();
+				}else if(isNhentaiUrl(url)){
+					NhentaiProcessor processor = new NhentaiProcessor(url, dir);
+					processor.process();
+				}else{
+					System.out.println(url + " is not supported");
+				}
 			} else {
 				HelpFormatter help = new HelpFormatter();
 				help.printHelp(ImageDownloader.class.getName(), options, true);
@@ -46,6 +60,20 @@ public class ImageDownloader {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static boolean isEhentaiUrl(String url) {
+		if(url.contains("e-hentai")){
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean isNhentaiUrl(String url) {
+		if(url.contains("nhentai")){
+			return true;
+		}
+		return false;
 	}
 
 	private static ArrayList<String> getUrlList(String f) {
