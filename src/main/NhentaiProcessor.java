@@ -97,9 +97,15 @@ public class NhentaiProcessor {
 			String tmp = matcher.group();
 			int beginIndex = tmp.indexOf("data-src=\"//t");
 			beginIndex += "data-src=\"//t".length();
-			int endIndex = tmp.indexOf("t.jpg\" />");
-			String imageUrl = "http://i" + tmp.substring(beginIndex, endIndex) + ".jpg";
-			urlList.add(imageUrl);
+			if(tmp.contains(".jpg")){
+				int endIndex = tmp.indexOf("t.jpg\" />");
+				String imageUrl = "http://i" + tmp.substring(beginIndex, endIndex) + ".jpg";
+				urlList.add(imageUrl);
+			}else{
+				int endIndex = tmp.indexOf("t.png\" />");
+				String imageUrl = "http://i" + tmp.substring(beginIndex, endIndex) + ".png";
+				urlList.add(imageUrl);
+			}
 		}
 		return urlList;
 	}
