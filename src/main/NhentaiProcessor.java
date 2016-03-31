@@ -61,7 +61,7 @@ public class NhentaiProcessor {
 		for (String url : list) {
 			index++;
 			StringBuilder sb = new StringBuilder();
-			sb.append("( ").append(index).append(" / ").append(totalImages).append(" ) ").append(url);
+			sb.append("(").append(index).append("/").append(totalImages).append(") ").append(url);
 			System.out.println(sb.toString());
 			try {
 				HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();

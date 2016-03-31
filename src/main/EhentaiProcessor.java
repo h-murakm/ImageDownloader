@@ -60,10 +60,8 @@ public class EhentaiProcessor {
 		for (String url : list) {
 			index++;
 			StringBuilder sb = new StringBuilder();
-			sb.append("( ").append(index).append(" / ").append(totalImages).append(" ) ").append(url);
+			sb.append("(").append(index).append("/").append(totalImages).append(") ").append(url);
 			System.out.println(sb.toString());
-			boolean validFlag = false;
-			//while (!validFlag) {
 			try {
 				HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 				conn.setAllowUserInteraction(false);
@@ -86,11 +84,9 @@ public class EhentaiProcessor {
 				}
 				dataInStream.close();
 				dataOutStream.close();
-				validFlag = true;
 			} catch (Exception e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 			}
-			//}
 		}
 	}
 
