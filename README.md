@@ -12,8 +12,11 @@ The latest version of **ImageDownloader** is supported for [E-hentai.org](http:/
 1. Set the following arguments
 
   `main.ImageDownloader [-d <arg>] [-f <arg>] [-u <arg>]`
+
      `-d <arg>   Distination directory`
+
      `-f <arg>   File containing target URLs`
+
      `-u <arg>   Target URL`
 
 2. Then, **ImageDownloader** collects images in the target URL into the distination directory.
