@@ -29,6 +29,3 @@ The latest version of **ImageDownloader** is supported for [E-hentai.org](http:/
 - Then, **ImageDownloader** collects images in the target URL into the distination directory.
 **ImageDownloader** automatically decides [E-hentai.org](http://e-hentai.org/) or [nhentai.net](http://nhentai.net/) as the download website from the target URL.
 In the case of setting the argument `-f`, each URL in the file is targeted for download.
-
-## Todo
-- Multi-threading

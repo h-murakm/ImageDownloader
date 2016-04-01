@@ -1,17 +1,14 @@
 package main;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,36 +54,14 @@ public class EhentaiProcessor {
 		File newDir = new File(dir + "\\\\" + imageName);
 		newDir.mkdir();
 		int index = 0;
+		int threadsNum = Runtime.getRuntime().availableProcessors();
+		ExecutorService service = Executors.newFixedThreadPool(threadsNum);
 		for (String url : list) {
 			index++;
-			StringBuilder sb = new StringBuilder();
-			sb.append("(").append(index).append("/").append(totalImages).append(") ").append(url);
-			System.out.println(sb.toString());
-			try {
-				HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-				conn.setAllowUserInteraction(false);
-				conn.setInstanceFollowRedirects(true);
-				conn.setRequestMethod("GET");
-				conn.connect();
-				int httpStatusCode = conn.getResponseCode();
-				if (httpStatusCode != HttpURLConnection.HTTP_OK) {
-					throw new Exception();
-				}
-				String fileName = url.substring(url.lastIndexOf("/"));
-				String dist = newDir.toString() + fileName;
-				DataInputStream dataInStream = new DataInputStream(conn.getInputStream());
-				DataOutputStream dataOutStream = new DataOutputStream(new BufferedOutputStream(
-						new FileOutputStream(dist)));
-				byte[] b = new byte[8192];
-				int readByte = 0;
-				while (-1 != (readByte = dataInStream.read(b))) {
-					dataOutStream.write(b, 0, readByte);
-				}
-				dataInStream.close();
-				dataOutStream.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			service.execute(new DownloaderThread(index, totalImages, newDir, url));
+		}
+		service.shutdown();
+		while (!service.isTerminated()) {
 		}
 	}
 
@@ -115,9 +90,9 @@ public class EhentaiProcessor {
 			beginIndex += "<img id=\"img\" src=\"".length();
 			int endIndex = source.indexOf("\" style=", beginIndex);
 			String imageUrl = source.substring(beginIndex, endIndex);
-			StringBuilder sb = new StringBuilder();
-			sb.append("( ").append(index).append(" / ").append(totalImages).append(" ) ").append(imageUrl);
-			System.out.println(sb.toString());
+//			StringBuilder sb = new StringBuilder();
+//			sb.append("(").append(index).append("/").append(totalImages).append(") ").append(imageUrl);
+//			System.out.println(sb.toString());
 			return imageUrl;
 		} catch (IOException e) {
 			e.printStackTrace();
