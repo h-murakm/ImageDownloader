@@ -34,6 +34,7 @@ public class DownloaderThread implements Runnable {
 			conn.connect();
 			int httpStatusCode = conn.getResponseCode();
 			if (httpStatusCode != HttpURLConnection.HTTP_OK) {
+				conn.disconnect();
 				throw new Exception();
 			}
 			String fileName = url.substring(url.lastIndexOf("/"));
@@ -48,6 +49,7 @@ public class DownloaderThread implements Runnable {
 			}
 			dataInStream.close();
 			dataOutStream.close();
+			conn.disconnect();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -78,15 +78,7 @@ public class ImageDownloader {
 
 	private static void processFile(ArrayList<String> urlList, String dir, boolean isJapanese) {
 		for (String url : urlList) {
-			if (isEhentaiUrl(url)) {
-				EhentaiProcessor processor = new EhentaiProcessor(url, dir, isJapanese);
-				processor.process();
-			} else if (isNhentaiUrl(url)) {
-				NhentaiProcessor processor = new NhentaiProcessor(url, dir, isJapanese);
-				processor.process();
-			} else {
-				System.out.println(url + " is not supported");
-			}
+			processUrl(url, dir, isJapanese);
 		}
 	}
 

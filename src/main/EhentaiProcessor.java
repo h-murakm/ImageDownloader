@@ -57,6 +57,10 @@ public class EhentaiProcessor {
 		int threadsNum = Runtime.getRuntime().availableProcessors();
 		ExecutorService service = Executors.newFixedThreadPool(threadsNum);
 		for (String url : list) {
+			if(url.endsWith("509.gif")){
+				System.out.println("509 occurred");
+				System.exit(0);
+			}
 			index++;
 			service.execute(new DownloaderThread(index, totalImages, newDir, url));
 		}
